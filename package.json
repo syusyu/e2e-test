@@ -1,0 +1,25 @@
+{
+  "name": "e2e-test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/syusyu/e2e-test.git"
+  },
+  "author": "Okabe",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/syusyu/e2e-test/issues"
+  },
+  "homepage": "https://github.com/syusyu/e2e-test#readme",
+  "devDependencies": {
+    "chalk": "^2.4.1",
+    "jest": "^23.0.1",
+    "puppeteer": "^1.4.0",
+    "rimraf": "^2.6.2"
+  }
+}
