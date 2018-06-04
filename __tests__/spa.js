@@ -23,16 +23,29 @@ describe(
 
 
         it('Load list page', async () => {
+            //Evaluate subtitle
             const subTitle = await page.evaluate(() => {
                 return document.querySelector('.list.visible > h3').textContent;
             });
             expect(subTitle).toContain('プランの変更予約をする');
 
+            //Evaluate device list
             const deviceLabels = await page.evaluate(() => {
                 return Array.from(document.querySelector('#devices')).filter(e => e.getAttribute('data-bind-id').includes('$')).map(e => e.label);
             });
             expect(deviceLabels.sort()).toEqual(["Please select", "Device title1 of plan1", "Device title2 of plan1"].sort());
-        })
+
+        });
+
+        it('Pop up question', async () => {
+            await page.click('#show-popup-warning');
+
+            //Evaluate warning
+            const warningTitle = await page.evaluate(() => {
+                return document.querySelector('.modal.warning.visible > .spa-modal > .spa-modal-container > .spa-modal-contents-title > p.spa-modal-contents-title-left ').textContent;
+            });
+            expect(warningTitle).toEqual('注意事項');
+        });
     },
     timeout
 );
