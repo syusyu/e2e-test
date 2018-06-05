@@ -14,7 +14,7 @@ describe(
                 }
             });
             await page.goto('https://syusyu.github.io/spa-manager/src/index.html');
-            await sleep(2000);
+            await sleep(1000);
         }, timeout);
 
         afterAll(async () => {
@@ -45,6 +45,21 @@ describe(
                 return document.querySelector('.modal.warning.visible > .spa-modal > .spa-modal-container > .spa-modal-contents-title > p.spa-modal-contents-title-left ').textContent;
             });
             expect(warningTitle).toEqual('注意事項');
+
+            //Close popup
+            //See https://github.com/GoogleChrome/puppeteer/issues/684
+            const selector = '#close-popup-warning';
+            const Frame = await page.frames()[0];
+            await Frame.$eval(selector, el => el.click());
+        });
+
+        it ('Go to confirm page', async () => {
+            await page.click('[data-action-click-id="next-to-confirm"]');
+
+            const subTitle = await page.evaluate(() => {
+                return document.querySelector('.confirm.visible > h3').textContent;
+            });
+            expect(subTitle).toContain('変更内容の確認');
         });
     },
     timeout
