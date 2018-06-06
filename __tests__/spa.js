@@ -3,7 +3,7 @@ const timeout = 5000;
 const sleep = msec => new Promise(resolve => setTimeout(resolve, msec));
 
 describe(
-    '/spa-manager/index.html',
+    '/spa-manager/change',
     () => {
         let page;
 
@@ -15,6 +15,7 @@ describe(
                 }
             });
             await page.goto('https://syusyu.github.io/spa-manager/src/index.html');
+            // await page.goto('http://localhost:8080/src/index.html');
             await sleep(1000);
         }, timeout);
 
@@ -78,11 +79,27 @@ describe(
         const evaluateCompletion = (title) => {
             it (title, async () => {
                 await page.click('.confirm.visible > .box-for-btn > a[data-action-click-dbupdate-id="update"]');
+                await page.waitFor('.complete.visible > h3');
                 const subTitle = await page.evaluate(() => {
                     return document.querySelector('.complete.visible > h3').textContent;
                 });
-                //This doesn't work because popState function of spa-manager, I guess.
-                // expect(subTitle).toContain('変更予約が完了しました。');
+                expect(subTitle).toContain('変更予約が完了しました。');
+            });
+        };
+
+        const evaluateCancelPageFromList = (title)  => {
+            it (title, async () => {
+                await page.click('[data-action-click-id="cancel-init"]');
+                const subTitle = await page.evaluate(() => {
+                    return document.querySelector('.cancel.visible > h3').textContent;
+                });
+                expect(subTitle).toContain('プラン変更をキャンセルする');
+
+                // const dateAmount = await page.evaluate(() => {
+                //     const row = document.querySelector('table.tbl_history > tbody > tr[data-bind-replaced-key="HISTORY.history_list"]:nth-child(0)');
+                //     console.debug(`row=${row.innerHTML}`);
+                // });
+
             });
         };
 
@@ -97,3 +114,43 @@ describe(
     timeout
 );
 
+describe(
+    '/spa-manager/cancel',
+    () => {
+        let page;
+
+        beforeAll(async () => {
+            page = await global.__BROWSER__.newPage();
+            page.on('console', consoleMessage => {
+                if (consoleMessage.type() === 'debug') {
+                    console.debug(`########## ${consoleMessage.text()}`)
+                }
+            });
+            await page.goto('https://syusyu.github.io/spa-manager/src/index.html');
+            await sleep(1000);
+        }, timeout);
+
+        afterAll(async () => {
+            await page.close()
+        });
+
+        const evaluateCancelPageFromList = (title)  => {
+            it (title, async () => {
+                await page.click('[data-action-click-id="cancel-init"]');
+                const subTitle = await page.evaluate(() => {
+                    return document.querySelector('.cancel.visible > h3').textContent;
+                });
+                expect(subTitle).toContain('プラン変更をキャンセルする');
+
+                const dateAmount = await page.evaluate(() => {
+                    const cols = document.querySelectorAll('table.tbl_history > tbody > tr:nth-child(2)[data-bind-replaced-key="HISTORY.history_list"] > td');
+                    return Array.from(cols).map(e => e.textContent);
+                });
+                expect(dateAmount).toEqual(['2017/1/25', '2G']);
+            });
+        };
+
+        evaluateCancelPageFromList('Test cancel page is shown');
+    },
+    timeout
+);
