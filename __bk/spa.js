@@ -5,6 +5,7 @@ const sleep = msec => new Promise(resolve => setTimeout(resolve, msec));
 describe(
     '/spa-manager/change',
     () => {
+
         let page;
 
         beforeAll(async () => {
@@ -150,7 +151,9 @@ describe(
             });
         };
 
-        evaluateCancelPageFromList('Test cancel page is shown');
+        (async () => {
+            evaluateCancelPageFromList('Test cancel page is shown');
+        })();
     },
     timeout
 );
