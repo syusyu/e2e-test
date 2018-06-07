@@ -1,19 +1,51 @@
-const timeout = 5000;
+const fs = require('fs');
+const timeout = 1000;
 
 let page;
+
+const excludedRequests = (request) => {
+    const lists = ['image', 'stylesheet', 'script'];
+    return lists.includes(request.resourceType());
+};
+
+const networkLogs = [];
 
 describe('spa-manager', () => {
     beforeAll(async () => {
         page = await global.__BROWSER__.newPage();
+        await page.setRequestInterception(true);
         page.on('console', consoleMessage => {
             if (consoleMessage.type() === 'debug') {
                 console.debug(`########## ${consoleMessage.text()}`)
             }
         });
+        page.on('request', request => {
+            if (!excludedRequests(request)) {
+                networkLogs.push({
+                    ts: Date.now(),
+                    network: 'request',
+                    url: request.url(),
+                    type: request.resourceType()
+                });
+            }
+            request.continue();
+        });
+        // page.on('response', response => {
+        //     if (!excludedRequests(response.request())) {
+        //         networkLogs.push({
+        //             ts: Date.now(),
+        //             network: 'response',
+        //             url: response.url(),
+        //             type: response.request().resourceType()
+        //         });
+        //     }
+        // });
     });
 
     afterAll(async () => {
-        await page.close()
+        await page.close();
+        // console.debug(`networkLogs=${JSON.stringify(networkLogs)}`);
+        fs.writeFileSync('./outputs/networkLogs.json', JSON.stringify(networkLogs));
     });
 
     describe(
