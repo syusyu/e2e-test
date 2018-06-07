@@ -1,7 +1,5 @@
 const timeout = 5000;
 
-const sleep = msec => new Promise(resolve => setTimeout(resolve, msec));
-
 let page;
 
 describe('spa-manager', () => {
@@ -111,17 +109,47 @@ describe('spa-manager', () => {
                     return document.querySelector('.cancel.visible > h3').textContent;
                 });
                 expect(subTitle).toContain('プラン変更をキャンセルする');
-
+            };
+            const expectFilterInitialized = async ()  => {
                 const dateAmount = await page.evaluate(() => {
                     const cols = document.querySelectorAll('table.tbl_history > tbody > tr:nth-child(2)[data-bind-replaced-key="HISTORY.history_list"] > td');
                     return Array.from(cols).map(e => e.textContent);
                 });
                 expect(dateAmount).toEqual(['2017/1/25', '2G']);
             };
+            const expectFilterChanged = async () => {
+                const dateAmount = await page.evaluate(() => {
+                    const cols = document.querySelectorAll('table.tbl_history > tbody > tr:nth-child(2)[data-bind-replaced-key="HISTORY.history_list"] > td');
+                    return Array.from(cols).map(e => e.textContent);
+                });
+                expect(dateAmount).toEqual(['2016/12/25', '800M']);
+            };
+            const expectCancelCompletePage = async ()  => {
+                await page.waitFor('.cancel-complete.visible > h3');
+                const subTitle = await page.evaluate(() => {
+                    return document.querySelector('.cancel-complete.visible > h3').textContent;
+                });
+                expect(subTitle).toContain('キャンセルが完了しました。');
+            };
 
             it ('Open cancel init page', async () => {
                 await page.click('[data-action-click-id="cancel-init"]');
                 await expectCancelInitPage();
+                await expectFilterInitialized();
+            });
+            it ('Change filter of date', async () => {
+                await page.select('select[data-action-change-id="filter-history"]', '2016-12');
+                await expectCancelInitPage();
+                await expectFilterChanged();
+            });
+            it ('Cannot execute cancel', async () => {
+                await page.click('.cancel.visible > .plan-change-cancel-btn-area > .plan-change-cancel-btn-wrapper > a[data-action-click-dbupdate-id="cancel"]');
+                await expectCancelInitPage();
+            });
+            it ('Can execute cancel', async () => {
+                await page.click('.plan-change-cancel-check');
+                await page.click('.cancel.visible > .plan-change-cancel-btn-area > .plan-change-cancel-btn-wrapper > a[data-action-click-dbupdate-id="cancel"]');
+                await expectCancelCompletePage();
             });
         },
         timeout
