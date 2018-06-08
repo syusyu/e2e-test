@@ -10,26 +10,30 @@ const excludedRequests = (request) => {
 
 const networkLogs = [];
 
-xdescribe('spa-manager', () => {
+describe('spa-manager', () => {
     beforeAll(async () => {
         page = await global.__BROWSER__.newPage();
-        await page.setRequestInterception(true);
         page.on('console', consoleMessage => {
             if (consoleMessage.type() === 'debug') {
                 console.debug(`########## ${consoleMessage.text()}`)
             }
         });
-        page.on('request', request => {
-            if (!excludedRequests(request)) {
-                networkLogs.push({
-                    ts: Date.now(),
-                    network: 'request',
-                    url: request.url(),
-                    type: request.resourceType()
-                });
-            }
-            request.continue();
-        });
+
+        //------------------------------------------------- [Warning] --------------------------------------------------
+        //If you cancel the following comment-out, it'll affect to cause ERR_CERT_AUTHORITY_INVALID in other test case.
+        //--------------------------------------------------------------------------------------------------------------
+        // await page.setRequestInterception(true);
+        // page.on('request', request => {
+        //     if (!excludedRequests(request)) {
+        //         networkLogs.push({
+        //             ts: Date.now(),
+        //             network: 'request',
+        //             url: request.url(),
+        //             type: request.resourceType()
+        //         });
+        //     }
+        //     request.continue();
+        // });
         // page.on('response', response => {
         //     if (!excludedRequests(response.request())) {
         //         networkLogs.push({

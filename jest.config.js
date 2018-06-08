@@ -3,6 +3,6 @@ module.exports = {
   globalTeardown: './teardown.js',
   testEnvironment: './puppeteer_environment.js',
   modulePathIgnorePatterns: [
-    "outputs"
+    "output"
   ],
 };
