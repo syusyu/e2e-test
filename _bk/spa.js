@@ -10,7 +10,7 @@ const excludedRequests = (request) => {
 
 const networkLogs = [];
 
-describe('spa-manager', () => {
+xdescribe('spa-manager', () => {
     beforeAll(async () => {
         page = await global.__BROWSER__.newPage();
         await page.setRequestInterception(true);
