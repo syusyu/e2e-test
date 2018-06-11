@@ -49,7 +49,7 @@ describe('spa-manager', () => {
     afterAll(async () => {
         await page.close();
         // console.debug(`networkLogs=${JSON.stringify(networkLogs)}`);
-        fs.writeFileSync('./outputs/networkLogs.json', JSON.stringify(networkLogs));
+        fs.writeFileSync('./output/networkLogs.json', JSON.stringify(networkLogs));
     });
 
     describe(

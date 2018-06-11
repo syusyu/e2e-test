@@ -38,17 +38,27 @@ describe('Front Site Purchase', () => {
 
     afterAll(async () => {
         await page.close();
-        // console.debug(`networkLogs=${JSON.stringify(networkLogs)}`);
-        fs.writeFileSync('./outputs/networkLogs_purchase.json', JSON.stringify(networkLogs));
+        fs.writeFileSync('./output/networkLogs_purchase.json', JSON.stringify(networkLogs));
     });
 
     describe(
         'Top page',
         () => {
+            const pageCommonSelector = 'meta[http-equiv="cms_page_name"]';
             const topPageSelector = '#mainslider > .wideslider_base > .wideslider_wrap > ul.mainList';
             const loginTopLinkSelector = '#header > .header-middle > .right > ul.nav > li > a[href*="LoginTop"]';
 
+            const expectPageShown = async (content) => {
+                await page.waitForSelector(pageCommonSelector);
+                const cmsPageName = await page.evaluate(pageCommonSelector => {
+                    return document.querySelector(pageCommonSelector).getAttribute('content');
+                }, pageCommonSelector);
+                expect(cmsPageName).toEqual(content);
+            };
+
             const expectTopPage = async () => {
+                await expectPageShown('トップ');
+
                 await page.waitForSelector(topPageSelector);
                 const existsTopImages = await page.evaluate(topPageSelector => {
                     return document.querySelector(topPageSelector).children.length > 0;
@@ -56,10 +66,14 @@ describe('Front Site Purchase', () => {
                 expect(existsTopImages).toEqual(true);
             };
 
+            const expectItemDetailPage = async () => {
+                await expectPageShown('商品詳細');
+            };
+
             it('Open top page', async () => {
                 await page.goto(rootUrl + 'Index');
                 await expectTopPage();
-            });
+            }, timeout);
 
             it ('Login for guest member', async () => {
                 //If Not login, do login here.
@@ -77,15 +91,12 @@ describe('Front Site Purchase', () => {
                     await page.click(loginBtnSelector);
                     await expectTopPage();
                 }
-            });
-
-            //Go to item detail page.
-
-            //Put item to Cart
+            }, timeout);
 
 
         }
     , timeout);
+
 }, timeout);
 
 

@@ -24,3 +24,9 @@ yarn-error.log*
 
 # output
 /output
+
+# config
+/config
+
+# backup or temporally files
+/bk
