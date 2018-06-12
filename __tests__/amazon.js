@@ -2,6 +2,8 @@ const fs = require('fs');
 const config = require('config');
 const timeout = 10000;
 
+const sleep = msec => new Promise(resolve => setTimeout(resolve, msec));
+
 const excludedRequests = (request) => {
     const lists = ['image', 'stylesheet', 'script'];
     return lists.includes(request.resourceType());
@@ -133,9 +135,46 @@ describe('Amazon', () => {
                 await expectCartConfirmPage();
             });
 
-            // it ('Change delivery date and time', async () => {
-            //
-            // });
+            it ('Open delivery date and time dialog', async () => {
+                const btnSelector  = 'span.sd-calendar-button > span.a-button-inner > input';
+                const btnSelector2 = 'span.sd-calendar-button > span.a-button-inner > input[value="時間を選択"]';
+                const btnSelector3 = 'span.sd-calendar-button > span.a-button-inner > input[value="配達時間を変更"]';
+
+                await page.evaluate(btnSelector => {
+                    return Array.from(document.querySelectorAll(btnSelector)).filter(e => e.value === '時間を選択')[0].click();
+                }, btnSelector);
+                await page.waitForSelector(btnSelector3);
+
+                await page.evaluate(btnSelector => {
+                    return Array.from(document.querySelectorAll(btnSelector)).filter(e => e.value === '配達時間を変更')[0].click();
+                }, btnSelector);
+
+                //See https://github.com/GoogleChrome/puppeteer/issues/1361
+                await page.waitFor(3000);
+            }, timeout);
+
+            it ('Change delivery time', async () => {
+                const deliveryOptionSelector = 'table.sd-timeslot-table > tbody > tr:nth-child(3) > td:nth-child(2)';
+                const deliveryFrameCloseBtnSelector = '.ap_close > a > span.ap_closetext';
+
+                await page.$eval(deliveryOptionSelector, e => {
+                    e.click();
+                });
+                // for (let frame of await page.frames()) {
+                //     if (frame.name() === 'a-popover-iframe-1') {
+                //         await frame.click(deliveryOptionSelector);
+                //     }
+                // }
+
+                await page.waitFor(1000);
+
+                // for (let frame of await page.frames()) {
+                //     if (frame.name() === 'a-popover-iframe-1') {
+                //         await frame.click(deliveryFrameCloseBtnSelector);
+                //     }
+                // }
+                console.debug(`finish!!!`);
+            }, timeout);
         }
     , timeout);
 
