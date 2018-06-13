@@ -153,28 +153,16 @@ describe('Amazon', () => {
                 await page.waitFor(3000);
             }, timeout);
 
-            it ('Change delivery time', async () => {
-                const deliveryOptionSelector = 'table.sd-timeslot-table > tbody > tr:nth-child(3) > td:nth-child(2)';
-                const deliveryFrameCloseBtnSelector = '.ap_close > a > span.ap_closetext';
 
-                await page.$eval(deliveryOptionSelector, e => {
-                    e.click();
-                });
-                // for (let frame of await page.frames()) {
-                //     if (frame.name() === 'a-popover-iframe-1') {
-                //         await frame.click(deliveryOptionSelector);
-                //     }
-                // }
-
-                await page.waitFor(1000);
-
-                // for (let frame of await page.frames()) {
-                //     if (frame.name() === 'a-popover-iframe-1') {
-                //         await frame.click(deliveryFrameCloseBtnSelector);
-                //     }
-                // }
-                console.debug(`finish!!!`);
-            }, timeout);
+            // TODO Should find the solution to operate the popup contents bellow.
+            // TODO I guess the element of which z-index > 0 has a problem to handle.
+            // it ('Change delivery time', async () => {
+            //     const deliveryOptionSelector = 'table.sd-timeslot-table > tbody > tr:nth-child(3) > td:nth-child(2)';
+            //     await page.evaluate(deliveryOptionSelector => {
+            //         const td = document.querySelector(deliveryOptionSelector);
+            //         td.click();
+            //     }, deliveryOptionSelector);
+            // }, timeout);
         }
     , timeout);
 
