@@ -12,6 +12,10 @@ module.exports = async function() {
     const browser = await puppeteer.launch({
         ignoreHTTPSErrors: true,
         headless: false,
+        args: [
+            '--ignore-certificate-errors',
+            '--ignore-certificate-errors-spki-list '
+        ]
     });
     // const browser = await puppeteer.launch({ignoreHTTPSErrors: true});
     global.__BROWSER__ = browser;
