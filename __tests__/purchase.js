@@ -45,14 +45,20 @@ describe('Front Site Purchase', () => {
     describe(
         'Top page',
         () => {
-            const pageCommonSelector = 'meta[http-equiv="cms_page_name"]';
             const topPageSelector = '#mainslider > .wideslider_base > .wideslider_wrap > ul.mainList';
             const loginTopLinkSelector = '#header > .header-middle > .right > ul.nav > li > a[href*="LoginTop"]';
             const cartBtnSelector = '.buyBtn > a > img';
             const checkoutBtnSelector = '#mainBtn';
-            const cartNextBtnSelector = 'img.cart_next_btn';
+            const cartNextBtnOfAddressSelector = 'a.cart_next_link[data-action-url$="/cart/addresschk"]';
+            const cartNextBtnOfAddressOptSelector = 'a.cart_next_link[data-action-url$="/cart/addressoptchk"]';
+            const cartNextBtnOfPaymentSelector = 'a.cart_next_link[data-action-url$="/cart/paymentchk"]';
+            const cartNextBtnOfConfirmtSelector = 'a.cart_next_link[data-action-url$="/cart/thankyou"]';
             const cartAddressTypeRegisterSelector = '#addrInputType_SELECT_EXIST';
             const cartAddressOptDelDaySelector = '#delDaySelect_-0-0-0';
+            const cartPaymentCodSelector = '#payMethodKb_CASH_ON_DELIVERY';
+            const cartPaymentCodOptionSelector = 'input[name="paymentCodOption"][value="1"]';
+            const cartPaymentAgreeSelector = '#agree';
+            const cartConfirmTotalPriceSelector = 'p.totalprice';
 
             const expectTopPage = async () => {
                 await page.waitForSelector(topPageSelector);
@@ -87,11 +93,24 @@ describe('Front Site Purchase', () => {
                 expect(hasOption).toEqual(true);
             };
             const expectCartPayment = async() => {
-                await waitPage('支払い(カート)');
-                // await expectCartNextButton();
+                await page.waitForSelector(cartPaymentCodSelector);
+
+                const cvVal = await page.$eval(cartPaymentCodSelector, e => e.value);
+                expect(cvVal).toEqual('CASH_ON_DELIVERY');
+            };
+            const expectCartConfirm = async() => {
+                await page.waitForSelector(cartConfirmTotalPriceSelector);
+
+                const hasYen = await page.$eval(cartConfirmTotalPriceSelector, e => e.textContent);
+                expect(hasYen).toContain('円');
+            };
+            const expectCartThankyou = async () => {
+                const thankyouText = await page.$eval("#EC_cart", e => e.innerHTML);
+                expect(thankyouText).toContain('ご注文ありがとうございました');
             };
 
-            it('Top page', async () => {
+
+            it('Top', async () => {
                 await page.goto(rootUrl + 'Index');
                 await expectTopPage();
             }, timeout);
@@ -115,33 +134,63 @@ describe('Front Site Purchase', () => {
                 }
             }, timeout);
 
-            it('Item detail page', async () => {
-                await page.goto(rootUrl + 'ItemDetail?cmId=292');
+            it('Item Detail page', async () => {
+                await page.goto(rootUrl + 'ItemDetail?cmId=270');
                 await expectItemDetailPage();
             }, timeout);
 
-            it('Put an item to cart and redirect to Cart top', async () => {
+            it('Item Detail -> Cart Top', async () => {
                 await page.click(cartBtnSelector);
+                await page.waitForNavigation({ waitUntil: 'networkidle0' });
                 await expectCartTopPage();
             }, timeout);
 
-            it ('CartAddress after checkout', async () => {
+            it ('Cart Top -> Cart Address', async () => {
+                await page.waitForSelector(checkoutBtnSelector);
                 await page.click(checkoutBtnSelector);
+                await page.waitForNavigation({ waitUntil: 'networkidle0' });
                 await expectCartAddress();
             }, timeout);
 
-            it ('CartAddressOpt after CartAddress', async () => {
-                await page.click(cartNextBtnSelector);
+            it ('Cart Address -> Cart AddressOpt', async () => {
+                await page.waitForSelector(cartNextBtnOfAddressSelector);
+                await page.click(cartNextBtnOfAddressSelector);
+                await page.waitForNavigation({ waitUntil: 'networkidle0' });
                 await expectCartAddressOption();
             }, timeout);
 
-            // it ('/cart/payment', async () => {
-            //     await page.click(cartNextBtnSelector);
-            //     await expectCartPayment();
-            // }, timeout);
-        }
-    , timeout);
+            it ('Cart AddressOpt -> Cart Payment', async () => {
+                await page.waitForSelector(cartNextBtnOfAddressOptSelector);
+                await page.click(cartNextBtnOfAddressOptSelector);
+                await page.waitForNavigation({ waitUntil: 'networkidle0' });
+                await expectCartPayment();
+            }, timeout);
 
-}, timeout);
+            it ('Cart Payment -> Cart Confirm', async () => {
+                await page.waitForSelector(cartPaymentCodSelector);
+                await page.click(cartPaymentCodSelector);
+
+                await page.waitForSelector(cartPaymentCodOptionSelector);
+                await page.click(cartPaymentCodOptionSelector);
+
+                await page.waitForSelector(cartPaymentAgreeSelector);
+                await page.click(cartPaymentAgreeSelector);
+
+                await page.waitForSelector(cartNextBtnOfPaymentSelector);
+                await page.click(cartNextBtnOfPaymentSelector);
+                await page.waitForNavigation({ waitUntil: 'networkidle0' });
+                await expectCartConfirm();
+            }, timeout);
+
+            it ('Cart Confirm -> Thank you', async () => {
+                await page.waitForSelector(cartNextBtnOfConfirmtSelector);
+                await page.click(cartNextBtnOfConfirmtSelector);
+                await page.waitForNavigation({ waitUntil: 'networkidle0' });
+                await expectCartThankyou();
+            });
+        }
+    , 60000);
+
+}, 120000);
 
 

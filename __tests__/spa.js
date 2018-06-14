@@ -19,21 +19,18 @@ describe('spa-manager', () => {
             }
         });
 
-        //------------------------------------------------- [Warning] --------------------------------------------------
-        //If you cancel the following comment-out, it'll affect to cause ERR_CERT_AUTHORITY_INVALID in other test case.
-        //--------------------------------------------------------------------------------------------------------------
-        // await page.setRequestInterception(true);
-        // page.on('request', request => {
-        //     if (!excludedRequests(request)) {
-        //         networkLogs.push({
-        //             ts: Date.now(),
-        //             network: 'request',
-        //             url: request.url(),
-        //             type: request.resourceType()
-        //         });
-        //     }
-        //     request.continue();
-        // });
+        await page.setRequestInterception(true);
+        page.on('request', request => {
+            if (!excludedRequests(request)) {
+                networkLogs.push({
+                    ts: Date.now(),
+                    network: 'request',
+                    url: request.url(),
+                    type: request.resourceType()
+                });
+            }
+            request.continue();
+        });
         // page.on('response', response => {
         //     if (!excludedRequests(response.request())) {
         //         networkLogs.push({
@@ -49,7 +46,7 @@ describe('spa-manager', () => {
     afterAll(async () => {
         await page.close();
         // console.debug(`networkLogs=${JSON.stringify(networkLogs)}`);
-        fs.writeFileSync('./output/networkLogs.json', JSON.stringify(networkLogs));
+        fs.writeFileSync('./output/networkLogs_spa.json', JSON.stringify(networkLogs));
     });
 
     describe(
